@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>厂区 60 设备温湿度总览</title>
+  <meta name="viewport" content="width=1920,initial-scale=1" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    :root{
+      --w:1920px; --h:1080px;
+      --gap:12px;
+      --cardW:calc((var(--w) - 420px - var(--gap)*7)/6);   /* 右侧报警区 420px */
+      --cardH:140px;
+      --fz36:36px; --fz20:20px; --fz18:18px; --fz16:16px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{width:var(--w);height:var(--h);overflow:hidden;font-family:"PingFang SC",Arial,sans-serif;background:#0e1a25;color:#fff}
+    .header{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:80px;background:#132935;font-size:var(--fz36)}
+    .main{display:flex;height:calc(var(--h) - 80px)}
+    .left{flex:1;display:flex;flex-direction:column}
+    .zone{margin-bottom:var(--gap)}
+    .zone-title{font-size:var(--fz20);margin:8px 0 8px 12px;color:#8ca0b3}
+    .cards{display:grid;grid-template-columns:repeat(10,1fr);gap:var(--gap);padding:0 var(--gap)}
+    .card{background:#1c2e3d;border-radius:6px;padding:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;width:var(--cardW);height:var(--cardH)}
+    .card.dev{font-size:var(--fz16);color:#8ca0b3;margin-bottom:4px;text-align:center}
+    .card.row{display:flex;align-items:baseline;gap:4px}
+    .card .value{font-size:var(--fz20);font-weight:700}
+    .card .unit{font-size:var(--fz16);color:#8ca0b3}
+    .temp{color:#ff9f1c}
+    .humi{color:#2ec4b6}
+    .status{position:absolute;top:6px;right:6px;width:10px;height:10px;border-radius:50%;background:#2ec4b6}
+    .status.abnormal{background:#ff4d4f;box-shadow:0 0 6px #ff4d4f}
+    .right{width:420px;background:#132935;display:flex;flex-direction:column;padding:12px}
+    .right h3{font-size:var(--fz20);margin-bottom:8px;font-weight:400;color:#8ca0b3}
+    .alarm-list{flex:1;overflow-y:auto}
+    .alarm-item{background:#1c2e3d;border-radius:4px;padding:8px;margin-bottom:6px;font-size:var(--fz16)}
+    .alarm-item .time{font-size:var(--fz16);color:#8ca0b3;margin-right:8px}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <span>厂区 60 设备温湿度总览</span>
+      <span class="time">{{ now }}</span>
+    </header>
+
+    <div class="main">
+      <div class="left">
+        <div class="zone" v-for="(zone,name) in grouped" :key="name">
+          <div class="zone-title">{{ name }}</div>
+          <div class="cards">
+            <div class="card" v-for="d in zone" :key="d.id">
+              <span class="status" :class="{abnormal:d.abnormal}"></span>
+              <div class="dev">{{ d.dev }}</div>
+              <div class="row">
+                <span class="value temp">{{ d.temp.toFixed(1) }}</span>
+                <span class="unit">℃</span>
+                <span class="value humi" style="margin-left:12px">{{ d.humi.toFixed(1) }}</span>
+                <span class="unit">%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="right">
+        <h3>实时报警</h3>
+        <div class="alarm-list">
+          <div class="alarm-item" v-for="a in alarms" :key="a.id">
+            <span class="time">{{ a.time }}</span>
+            <span>{{ a.dev }}</span>
+            <span style="color:#ff9f1c"> 温度{{ a.temp }}℃</span>
+            <span style="color:#2ec4b6"> 湿度{{ a.humi }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, reactive, computed } = Vue
+
+    createApp({
+      setup() {
+        const zones = ['成型车间','干燥车间','仓库','中央空调站','机房','实验室']
+        const devNames = []
+        zones.forEach(z => { for(let i=1;i<=10;i++) devNames.push(`${z}-${i}#`) })  // 6*10=60
+        const devices = reactive(
+          devNames.map((d,idx) => ({
+            id: idx,
+            dev: d,
+            zone: d.split('-')[0],
+            temp: 22 + Math.random() * 16,
+            humi: 40 + Math.random() * 30,
+            get abnormal() { return this.temp > 35 || this.humi > 65 }
+          }))
+        )
+
+        const alarms = reactive([])   // 最多保留 200 条
+        const pushAlarm = d => {
+          alarms.unshift({ id: Date.now() + d.id, time: new Date().toLocaleTimeString('zh-CN'), dev: d.dev, temp: d.temp.toFixed(1), humi: d.humi.toFixed(1) })
+          if (alarms.length > 200) alarms.pop()
+        }
+
+        const grouped = computed(() => {
+          const map = {}
+          devices.forEach(d => {
+            if (!map[d.zone]) map[d.zone] = []
+            map[d.zone].push(d)
+          })
+          return map
+        })
+
+        const updateData = () => {
+          devices.forEach(d => {
+            const oldAbn = d.abnormal
+            d.temp = 22 + Math.random() * 16
+            d.humi = 40 + Math.random() * 30
+            if (d.abnormal && !oldAbn) pushAlarm(d)   // 新异常
+          })
+        }
+
+        setInterval(updateData, 2000)
+        setInterval(() => { document.querySelector('.time').textContent = new Date().toLocaleString('zh-CN') }, 1000)
+
+        return { now: new Date().toLocaleString('zh-CN'), grouped, alarms }
+      }
+    }).mount('#app')
+  </script>
+</body>
+</html>
