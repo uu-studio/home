@@ -9,12 +9,12 @@
     :root {
       --w: 1920px;
       --h: 1080px;
-      --headerH: 70px;
-      --rightW: 400px;
-      --gap: 8px;
+      --headerH: 60px;
+      --rightW: 380px;
+      --gap: 6px;
       --cardW: calc((var(--w) - var(--rightW) - var(--gap) * 11) / 10);
-      --cardH: 140px;
-      --fz36: 32px; --fz20: 18px; --fz18: 16px; --fz16: 14px; --fz14: 12px;
+      --cardH: 120px;
+      --fz36: 28px; --fz20: 16px; --fz18: 14px; --fz16: 12px; --fz14: 10px;
       --primary: #0e1a25;
       --secondary: #132935;
       --card-bg: #1c2e3d;
@@ -52,7 +52,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 30px;
+      padding: 0 20px;
       height: var(--headerH);
       background: var(--secondary);
       font-size: var(--fz36);
@@ -77,31 +77,44 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 8px 0;
+      padding: 4px 0;
       overflow: hidden;
+      height: 100%;
+    }
+    
+    .zones-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
     }
     
     .zone {
-      margin-bottom: var(--gap);
-      flex-shrink: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 0;
     }
     
     .zone-title {
       font-size: var(--fz20);
-      margin: 4px 0 6px 16px;
+      margin: 2px 0 4px 12px;
       color: var(--text-secondary);
       display: flex;
       align-items: center;
+      height: 20px;
     }
     
     .zone-title::before {
       content: "";
       display: inline-block;
-      width: 3px;
-      height: 14px;
+      width: 2px;
+      height: 12px;
       background: var(--temp-color);
-      margin-right: 6px;
-      border-radius: 2px;
+      margin-right: 4px;
+      border-radius: 1px;
     }
     
     .cards {
@@ -109,12 +122,14 @@
       grid-template-columns: repeat(10, 1fr);
       gap: var(--gap);
       padding: 0 var(--gap);
+      flex: 1;
+      align-content: center;
     }
     
     .card {
       background: var(--card-bg);
-      border-radius: 6px;
-      padding: 8px 6px;
+      border-radius: 4px;
+      padding: 6px 4px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -123,24 +138,24 @@
       width: var(--cardW);
       height: var(--cardH);
       transition: all 0.3s ease;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
       flex-shrink: 0;
       min-width: 0;
     }
     
     .card:hover {
       transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     }
     
     .card.abnormal {
-      box-shadow: 0 0 0 2px var(--alarm-color);
+      box-shadow: 0 0 0 1px var(--alarm-color);
     }
     
     .card .dev {
       font-size: var(--fz16);
       color: var(--text-secondary);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       text-align: center;
       white-space: nowrap;
       overflow: hidden;
@@ -148,13 +163,13 @@
       width: 100%;
       max-width: 100%;
       padding: 0 2px;
-      line-height: 1.2;
+      line-height: 1.1;
     }
     
     .card .row {
       display: flex;
       align-items: baseline;
-      gap: 2px;
+      gap: 1px;
       flex-wrap: nowrap;
       justify-content: center;
       width: 100%;
@@ -184,10 +199,10 @@
     
     .status {
       position: absolute;
-      top: 6px;
-      right: 6px;
-      width: 10px;
-      height: 10px;
+      top: 4px;
+      right: 4px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--normal-color);
       transition: all 0.3s ease;
@@ -195,7 +210,7 @@
     
     .status.abnormal {
       background: var(--alarm-color);
-      box-shadow: 0 0 6px var(--alarm-color);
+      box-shadow: 0 0 4px var(--alarm-color);
       animation: pulse 1.5s infinite;
     }
     
@@ -210,14 +225,14 @@
       background: var(--secondary);
       display: flex;
       flex-direction: column;
-      padding: 12px;
+      padding: 8px;
       box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
       flex-shrink: 0;
     }
     
     .right h3 {
       font-size: var(--fz20);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       font-weight: 500;
       color: var(--text-secondary);
       display: flex;
@@ -228,8 +243,8 @@
     .alarm-count {
       background: var(--alarm-color);
       color: white;
-      border-radius: 10px;
-      padding: 1px 8px;
+      border-radius: 8px;
+      padding: 1px 6px;
       font-size: var(--fz14);
     }
     
@@ -258,23 +273,23 @@
     
     .alarm-item {
       background: var(--card-bg);
-      border-radius: 4px;
-      padding: 8px;
-      margin-bottom: 6px;
+      border-radius: 3px;
+      padding: 6px;
+      margin-bottom: 4px;
       font-size: var(--fz16);
       transition: all 0.3s ease;
-      border-left: 3px solid var(--alarm-color);
-      line-height: 1.3;
+      border-left: 2px solid var(--alarm-color);
+      line-height: 1.2;
     }
     
     .alarm-item:hover {
-      transform: translateX(2px);
+      transform: translateX(1px);
     }
     
     .alarm-item .time {
       font-size: var(--fz14);
       color: var(--text-secondary);
-      margin-right: 6px;
+      margin-right: 4px;
     }
     
     @keyframes scrollAlarms {
@@ -282,27 +297,27 @@
         transform: translateY(0);
       }
       100% {
-        transform: translateY(calc(-100% + 300px));
+        transform: translateY(calc(-100% + 250px));
       }
     }
     
     .refresh-indicator {
       position: fixed;
-      bottom: 15px;
-      right: 15px;
+      bottom: 10px;
+      right: 10px;
       background: rgba(28, 46, 61, 0.9);
-      padding: 6px 10px;
-      border-radius: 4px;
+      padding: 4px 8px;
+      border-radius: 3px;
       font-size: var(--fz14);
       color: var(--text-secondary);
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
     }
     
     .refresh-indicator .dot {
-      width: 6px;
-      height: 6px;
+      width: 4px;
+      height: 4px;
       border-radius: 50%;
       background: var(--normal-color);
       animation: pulse 1.5s infinite;
@@ -317,11 +332,6 @@
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
-
-    /* 确保布局精确计算 */
-    .left {
-      height: calc(6 * (var(--cardH) + var(--gap) + 30px));
-    }
   </style>
 </head>
 <body>
@@ -333,17 +343,19 @@
 
     <div class="main">
       <div class="left">
-        <div class="zone" v-for="(zone, name) in grouped" :key="name">
-          <div class="zone-title">{{ name }}</div>
-          <div class="cards">
-            <div class="card" :class="{abnormal: d.abnormal}" v-for="d in zone" :key="d.id">
-              <span class="status" :class="{abnormal: d.abnormal}"></span>
-              <div class="dev">{{ d.dev }}</div>
-              <div class="row">
-                <span class="value temp">{{ d.temp.toFixed(1) }}</span>
-                <span class="unit">℃</span>
-                <span class="value humi" style="margin-left:8px">{{ d.humi.toFixed(1) }}</span>
-                <span class="unit">%</span>
+        <div class="zones-container">
+          <div class="zone" v-for="(zone, name) in grouped" :key="name">
+            <div class="zone-title">{{ name }}</div>
+            <div class="cards">
+              <div class="card" :class="{abnormal: d.abnormal}" v-for="d in zone" :key="d.id">
+                <span class="status" :class="{abnormal: d.abnormal}"></span>
+                <div class="dev">{{ d.dev }}</div>
+                <div class="row">
+                  <span class="value temp">{{ d.temp.toFixed(1) }}</span>
+                  <span class="unit">℃</span>
+                  <span class="value humi" style="margin-left:6px">{{ d.humi.toFixed(1) }}</span>
+                  <span class="unit">%</span>
+                </div>
               </div>
             </div>
           </div>
@@ -364,7 +376,7 @@
                 <span style="color:var(--temp-color)"> 温度{{ a.temp }}℃</span>
                 <span style="color:var(--humi-color)"> 湿度{{ a.humi }}%</span>
               </div>
-              <div v-if="alarms.length === 0" style="text-align:center; padding:15px; color:var(--text-secondary); font-size: var(--fz14);">
+              <div v-if="alarms.length === 0" style="text-align:center; padding:10px; color:var(--text-secondary); font-size: var(--fz14);">
                 暂无报警信息
               </div>
             </div>
@@ -412,7 +424,7 @@
             temp: d.temp.toFixed(1), 
             humi: d.humi.toFixed(1) 
           })
-          if (alarms.length > 30) alarms.pop()
+          if (alarms.length > 25) alarms.pop()
         }
         
         const grouped = computed(() => {
