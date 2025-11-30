@@ -3,41 +3,293 @@
 <head>
   <meta charset="UTF-8" />
   <title>厂区 60 设备温湿度总览</title>
-  <meta name="viewport" content="width=1920,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <style>
-    :root{
-      --w:1920px;
-      --h:1080px;
-      --headerH:72px;
-      --rightW:400px;
-      --gap:10px;
-      --cardW:calc((var(--w) - var(--rightW) - var(--gap)*11)/10);
-      --cardH:152px;
-      --fz36:36px; --fz20:20px; --fz18:18px; --fz16:16px; --fz14:14px;
+    :root {
+      --w: 1920px;
+      --h: 1080px;
+      --headerH: 80px;
+      --rightW: 420px;
+      --gap: 12px;
+      --cardW: calc((var(--w) - var(--rightW) - var(--gap) * 11) / 10);
+      --cardH: 160px;
+      --fz36: 36px; --fz24: 24px; --fz20: 20px; --fz18: 18px; --fz16: 16px; --fz14: 14px;
+      --primary: #0e1a25;
+      --secondary: #132935;
+      --card-bg: #1c2e3d;
+      --text-primary: #ffffff;
+      --text-secondary: #8ca0b3;
+      --temp-color: #ff9f1c;
+      --humi-color: #2ec4b6;
+      --alarm-color: #ff4d4f;
+      --normal-color: #2ec4b6;
     }
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{width:var(--w);height:var(--h);overflow:hidden;font-family:"PingFang SC",Arial,sans-serif;background:#0e1a25;color:#fff}
-    .header{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:var(--headerH);background:#132935;font-size:var(--fz36)}
-    .main{display:flex;height:calc(var(--h) - var(--headerH))}
-    .left{flex:1;display:flex;flex-direction:column}
-    .zone{margin-bottom:var(--gap)}
-    .zone-title{font-size:var(--fz20);margin:6px 0 4px 12px;color:#8ca0b3}
-    .cards{display:grid;grid-template-columns:repeat(10,1fr);gap:var(--gap);padding:0 var(--gap)}
-    .card{background:#1c2e3d;border-radius:6px;padding:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;width:var(--cardW);height:var(--cardH)}
-    .card .dev{font-size:var(--fz16);color:#8ca0b3;margin-bottom:4px;text-align:center;white-space:nowrap}
-    .card .row{display:flex;align-items:baseline;gap:4px}
-    .card .value{font-size:var(--fz18);font-weight:700}
-    .card .unit{font-size:var(--fz14);color:#8ca0b3}
-    .temp{color:#ff9f1c}
-    .humi{color:#2ec4b6}
-    .status{position:absolute;top:6px;right:6px;width:10px;height:10px;border-radius:50%;background:#2ec4b6}
-    .status.abnormal{background:#ff4d4f;box-shadow:0 0 6px #ff4d4f}
-    .right{width:var(--rightW);background:#132935;display:flex;flex-direction:column;padding:10px}
-    .right h3{font-size:var(--fz20);margin-bottom:6px;font-weight:400;color:#8ca0b3}
-    .alarm-list{flex:1;overflow-y:auto}
-    .alarm-item{background:#1c2e3d;border-radius:4px;padding:6px;margin-bottom:4px;font-size:var(--fz16)}
-    .alarm-item .time{font-size:var(--fz14);color:#8ca0b3;margin-right:6px}
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      background: var(--primary);
+      color: var(--text-primary);
+    }
+    
+    #app {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: var(--headerH);
+      background: var(--secondary);
+      font-size: var(--fz36);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      z-index: 10;
+    }
+    
+    .header .time {
+      font-size: var(--fz20);
+      color: var(--text-secondary);
+    }
+    
+    .main {
+      display: flex;
+      height: calc(100% - var(--headerH));
+      overflow: hidden;
+    }
+    
+    .left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px 0;
+      overflow-y: auto;
+    }
+    
+    .zone {
+      margin-bottom: var(--gap);
+    }
+    
+    .zone-title {
+      font-size: var(--fz24);
+      margin: 6px 0 8px 20px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+    }
+    
+    .zone-title::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 18px;
+      background: var(--temp-color);
+      margin-right: 8px;
+      border-radius: 2px;
+    }
+    
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: var(--gap);
+      padding: 0 var(--gap);
+    }
+    
+    .card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      width: var(--cardW);
+      height: var(--cardH);
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .card.abnormal {
+      box-shadow: 0 0 0 2px var(--alarm-color);
+    }
+    
+    .card .dev {
+      font-size: var(--fz16);
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+    
+    .card .row {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    
+    .card .value {
+      font-size: var(--fz20);
+      font-weight: 700;
+    }
+    
+    .card .unit {
+      font-size: var(--fz14);
+      color: var(--text-secondary);
+    }
+    
+    .temp {
+      color: var(--temp-color);
+    }
+    
+    .humi {
+      color: var(--humi-color);
+    }
+    
+    .status {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--normal-color);
+      transition: all 0.3s ease;
+    }
+    
+    .status.abnormal {
+      background: var(--alarm-color);
+      box-shadow: 0 0 8px var(--alarm-color);
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    
+    .right {
+      width: var(--rightW);
+      background: var(--secondary);
+      display: flex;
+      flex-direction: column;
+      padding: 15px;
+      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .right h3 {
+      font-size: var(--fz24);
+      margin-bottom: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .alarm-count {
+      background: var(--alarm-color);
+      color: white;
+      border-radius: 12px;
+      padding: 2px 10px;
+      font-size: var(--fz14);
+    }
+    
+    .alarm-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+    
+    .alarm-item {
+      background: var(--card-bg);
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: var(--fz16);
+      transition: all 0.3s ease;
+      border-left: 4px solid var(--alarm-color);
+    }
+    
+    .alarm-item:hover {
+      transform: translateX(4px);
+    }
+    
+    .alarm-item .time {
+      font-size: var(--fz14);
+      color: var(--text-secondary);
+      margin-right: 8px;
+    }
+    
+    .refresh-indicator {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(28, 46, 61, 0.8);
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: var(--fz14);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .refresh-indicator .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--normal-color);
+      animation: pulse 1.5s infinite;
+    }
+    
+    /* 响应式调整 */
+    @media (max-width: 1920px) {
+      :root {
+        --w: 100vw;
+        --h: 100vh;
+      }
+    }
+    
+    /* 滚动条样式 */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
   </style>
 </head>
 <body>
@@ -49,11 +301,11 @@
 
     <div class="main">
       <div class="left">
-        <div class="zone" v-for="(zone,name) in grouped" :key="name">
+        <div class="zone" v-for="(zone, name) in grouped" :key="name">
           <div class="zone-title">{{ name }}</div>
           <div class="cards">
-            <div class="card" v-for="d in zone" :key="d.id">
-              <span class="status" :class="{abnormal:d.abnormal}"></span>
+            <div class="card" :class="{abnormal: d.abnormal}" v-for="d in zone" :key="d.id">
+              <span class="status" :class="{abnormal: d.abnormal}"></span>
               <div class="dev">{{ d.dev }}</div>
               <div class="row">
                 <span class="value temp">{{ d.temp.toFixed(1) }}</span>
@@ -67,28 +319,43 @@
       </div>
 
       <div class="right">
-        <h3>实时报警</h3>
+        <h3>
+          实时报警
+          <span class="alarm-count" v-if="alarms.length > 0">{{ alarms.length }}</span>
+        </h3>
         <div class="alarm-list">
           <div class="alarm-item" v-for="a in alarms" :key="a.id">
             <span class="time">{{ a.time }}</span>
             <span>{{ a.dev }}</span>
-            <span style="color:#ff9f1c"> 温度{{ a.temp }}℃</span>
-            <span style="color:#2ec4b6"> 湿度{{ a.humi }}%</span>
+            <span style="color:var(--temp-color)"> 温度{{ a.temp }}℃</span>
+            <span style="color:var(--humi-color)"> 湿度{{ a.humi }}%</span>
+          </div>
+          <div v-if="alarms.length === 0" style="text-align:center; padding:20px; color:var(--text-secondary)">
+            暂无报警信息
           </div>
         </div>
       </div>
     </div>
+    
+    <div class="refresh-indicator" v-if="showRefreshIndicator">
+      <div class="dot"></div>
+      <span>数据更新中...</span>
+    </div>
   </div>
 
   <script>
-    const { createApp, reactive, computed } = Vue
+    const { createApp, reactive, computed, ref } = Vue
+    
     createApp({
       setup() {
         const zones = ['成型车间','干燥车间','仓库','中央空调站','机房','实验室']
         const devNames = []
-        zones.forEach(z => { for(let i=1;i<=10;i++) devNames.push(`${z}-${i}#`) })
+        zones.forEach(z => { 
+          for(let i=1; i<=10; i++) devNames.push(`${z}-${i}#`) 
+        })
+        
         const devices = reactive(
-          devNames.map((d,idx) => ({
+          devNames.map((d, idx) => ({
             id: idx,
             dev: d,
             zone: d.split('-')[0],
@@ -97,27 +364,60 @@
             get abnormal() { return this.temp > 35 || this.humi > 65 }
           }))
         )
+        
         const alarms = reactive([])
+        const showRefreshIndicator = ref(false)
+        
         const pushAlarm = d => {
-          alarms.unshift({ id: Date.now() + d.id, time: new Date().toLocaleTimeString('zh-CN'), dev: d.dev, temp: d.temp.toFixed(1), humi: d.humi.toFixed(1) })
+          alarms.unshift({ 
+            id: Date.now() + d.id, 
+            time: new Date().toLocaleTimeString('zh-CN'), 
+            dev: d.dev, 
+            temp: d.temp.toFixed(1), 
+            humi: d.humi.toFixed(1) 
+          })
           if (alarms.length > 200) alarms.pop()
         }
+        
         const grouped = computed(() => {
           const map = {}
-          devices.forEach(d => { if (!map[d.zone]) map[d.zone] = []; map[d.zone].push(d) })
+          devices.forEach(d => { 
+            if (!map[d.zone]) map[d.zone] = []; 
+            map[d.zone].push(d) 
+          })
           return map
         })
+        
         const updateData = () => {
+          showRefreshIndicator.value = true
+          
           devices.forEach(d => {
             const oldAbn = d.abnormal
             d.temp = 22 + Math.random() * 16
             d.humi = 40 + Math.random() * 30
             if (d.abnormal && !oldAbn) pushAlarm(d)
           })
+          
+          setTimeout(() => {
+            showRefreshIndicator.value = false
+          }, 500)
         }
-        setInterval(updateData, 2000)
-        setInterval(() => { document.querySelector('.time').textContent = new Date().toLocaleString('zh-CN') }, 1000)
-        return { now: new Date().toLocaleString('zh-CN'), grouped, alarms }
+        
+        // 初始化数据更新
+        setInterval(updateData, 5000)
+        
+        // 更新时间显示
+        const now = ref(new Date().toLocaleString('zh-CN'))
+        setInterval(() => { 
+          now.value = new Date().toLocaleString('zh-CN') 
+        }, 1000)
+        
+        return { 
+          now, 
+          grouped, 
+          alarms,
+          showRefreshIndicator
+        }
       }
     }).mount('#app')
   </script>
