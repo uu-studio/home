@@ -1,0 +1,188 @@
+<template>
+    <div class="formula-generator">
+              <!-- 语言切换 -->
+      <div class="language-switch">
+        <el-tag @click="changeLanguage()">{{langText}}</el-tag>
+      </div>
+      <!-- 输入框 -->
+      <el-input
+        v-model="userInput"
+        :placeholder="$t('placeholder')" 
+        size="large"
+        class="input-field"
+      />
+      <!-- 按钮 -->
+      <el-button type="primary" @click="generateFormula" size="large"  v-if="showLoading == false">
+        {{ $t('buttonText') }}   
+      </el-button>
+      <el-button type="primary" size="large" v-if="showLoading">
+        {{ $t('buttonTextLoading') }}   
+      </el-button>
+  
+      <!-- 输出区域 -->
+      <div v-if="generatedFormula" class="output-section">
+        <p><strong>{{ $t('generatedFormula') }}</strong></p>
+        <el-card class="formula-card">
+          <pre class="output-formula">{{ generatedFormula }}</pre>
+        </el-card>
+      </div>
+  
+
+    </div>
+  </template>
+  
+  <script>
+  export default {
+    data() {
+      return {
+        userInput: '',
+        generatedFormula: null,
+        isEnglish:false,
+        showLoading:false,
+        langText:'English'
+      };
+    },
+    methods: {
+      generateFormula() {
+        if (this.userInput.trim() === '') {
+          this.generatedFormula = this.$t('invalidInput');  // 使用翻译
+          return;
+        }
+        
+        this.showLoading = true;
+
+        const input = this.userInput.trim().toLowerCase();
+        const axios = require('axios');
+        var sysContent = 'You are a Excel helpful assistant. Please response in English no more than 200 characters. Your response MUST be related to Excel, and other response IS forbidden.';
+        if(this.isEnglish == false)
+            sysContent = '你是一位从事Excel数据处理的办公人员，拥有丰富的表格应用经验。回答必须与Excel有关，严禁回答该主题以外问题。最多100个字符';
+        let data = JSON.stringify({
+        "messages": [
+            {
+            "content": sysContent,
+            "role": "system"
+            },
+            {
+            "content": input,
+            "role": "user"
+            }
+        ],
+        "model": "deepseek-chat",
+        "frequency_penalty": 0,
+        "max_tokens": 500,
+        "presence_penalty": 0,
+        "response_format": {
+            "type": "text"
+        },
+        "stop": null,
+        "stream": false,
+        "stream_options": null,
+        "temperature": 1,
+        "top_p": 1,
+        "tools": null,
+        "tool_choice": "none",
+        "logprobs": false,
+        "top_logprobs": null
+        });
+
+        let config = {
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: 'https://api.deepseek.com/chat/completions',
+        headers: { 
+            'Content-Type': 'application/json', 
+            'Accept': 'application/json', 
+            'Authorization': 'Bearer sk-5a16340f470f456e9ba2eb1ffdf9db8f'
+        },
+        data : data
+        };
+
+        axios(config)
+        .then((response) => {
+            this.generatedFormula = response.data.choices[0].message.content;
+            this.showLoading = false;
+        })
+        .catch((error) => {
+            console.log(error);
+            this.showLoading = false;
+        });
+      },
+      changeLanguage() {
+        this.isEnglish = !this.isEnglish;
+        console.log('this.isEnglish',this.isEnglish)
+        this.$i18n.locale = (this.isEnglish == true ? 'en' :'zh');
+        console.log('this.$i18n.locale',this.$i18n.locale)
+        this.langText = (this.isEnglish == true ? '中文' :'English');
+      },
+    },
+  };
+  </script>
+  
+  <style scoped>xin
+  .formula-generator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+  }
+  
+  .input-field {
+    width: 100%;
+    max-width: 30rem;
+    margin-bottom: 2rem;
+  }
+  
+  .output-section {
+    margin-top: 2rem;
+  }
+  
+  .formula-card {
+    background-color: #f4f4f4;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    max-width: 37.5rem;
+  }
+  
+  .language-switch {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+  }
+  
+  .language-switch el-button {
+    margin: 0 0.5rem;
+  }
+  
+.output-formula
+{
+    white-space: pre-wrap;
+    overflow-y: auto;
+    height: 100%;
+}
+
+  @media (max-width: 48rem) {
+    html {
+      font-size: 50%;
+    }
+  
+    .formula-generator {
+      padding: 1.5rem;
+    }
+  
+    .input-field {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+  
+    .output-section {
+      padding: 1rem;
+    }
+  }
+  
+  @media (max-width: 30rem) {
+    html {
+      font-size: 40%;
+    }
+  }
+  </style>
+  
